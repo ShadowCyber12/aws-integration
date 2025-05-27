@@ -40,11 +40,17 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.783</version>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>regions</artifactId>
 		</dependency>
 
 
@@ -62,6 +68,18 @@
 		<!-- <version>1.12.296</version> -->
 		<!-- </dependency> -->
 	</dependencies>
+
+		<dependencyManagement>
+		  <dependencies>
+		    <dependency>
+		      <groupId>software.amazon.awssdk</groupId>
+		      <artifactId>bom</artifactId>
+		      <version>2.25.1</version> <!-- ✅ use latest stable version -->
+		      <type>pom</type>
+		      <scope>import</scope>
+		    </dependency>
+		  </dependencies>
+		</dependencyManagement>
 
 	<build>
 		<plugins>

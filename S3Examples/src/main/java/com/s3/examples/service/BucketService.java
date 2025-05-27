@@ -1,19 +1,22 @@
 package com.s3.examples.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.util.IOUtils;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+
 
 @Service
 public class BucketService {
@@ -30,20 +33,24 @@ public class BucketService {
 	 * 
 	 * @param fileName
 	 */
-	public void downloadFile(String fileName, AmazonS3 amazonS3,String bucketName) {
+	public void downloadFile(String fileName, S3Client s3Client,String bucketName) {
 		try {
 			logger.info("File to be fetched from S3 {}", fileName);
-			S3Object s3Object = amazonS3.getObject(bucketName, fileName);
+			GetObjectRequest request = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build();
 
-			InputStream objectContent = s3Object.getObjectContent();
-
-			String content = IOUtils.toString(objectContent);
-			// String content = convertInputStreamToString(objectContent);
-			logger.info("Content {}", content);
+			try(ResponseInputStream<GetObjectResponse> inputStream = s3Client.getObject(request);
+		             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))){
+				   String content = reader.lines().collect(Collectors.joining("\n"));
+				   logger.info("Content {}", content);
+			}
+			
 
 		} catch (IOException e) {
 			logger.error("Error in reading file content {}", e.getMessage());
-		} catch (AmazonS3Exception s3Exception) {
+		} catch (S3Exception  s3Exception) {
 			logger.error("Some error occured", s3Exception.getMessage());
 		}
 
